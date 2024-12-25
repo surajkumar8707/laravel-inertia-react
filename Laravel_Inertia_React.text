@@ -1,0 +1,114 @@
+1) Install Fresh Laravel project.
+command : laravel new laravel-inertia-react
+
+2) Run these commands :
+command 1 : npm i react react-dom
+command 2 : npm install --save-dev @vitejs/plugin-react
+command 3 : composer require inertiajs/inertia-laravel
+
+3) Open you code editor like VS code, sublime, etc.
+
+4) Rename welcome.blade.php file to app.blade.php, then paste this code :
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+    @viteReactRefresh
+    @vite('resources/js/app.jsx')
+    @inertiaHead
+</head>
+<body>
+    @inertia
+    <div id="app"></div>
+</body>
+</html>
+
+5) now run this command : php artisan inertia:middleware, after running this command, paste this code in
+->withMiddleware(function (Middleware $middleware) {
+    $middleware->web(append: [
+        HandleInertiaRequests::class,
+    ]);
+})
+
+6) Now Install dependencies for frontend using this command :
+command : npm install @inertiajs/react
+
+7) Initialize the Inertia app, for this go to "resources/js/app.js" and change app.js to app.jsx then write below code :
+import './bootstrap';
+import { createInertiaApp } from '@inertiajs/react'
+import { createRoot } from 'react-dom/client'
+
+createInertiaApp({
+  resolve: name => {
+    const pages = import.meta.glob('./Pages/**/*.jsx', { eager: true })
+    return pages[`./Pages/${name}.jsx`]
+  },
+  setup({ el, App, props }) {
+    createRoot(el).render(<App {...props} />)
+  },
+})
+
+8) Now include the plugin in your vite.config.js configuration file:
+import { defineConfig } from 'vite';
+import laravel from 'laravel-vite-plugin';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig({
+    plugins: [
+        laravel({
+            input: 'resources/js/app.jsx',
+            refresh: true,
+        }),
+        react(),
+    ],
+    resolve: {
+        alias: {
+            "@": "resources/js"
+        },
+    },
+});
+
+9) Now create "Pages" folder in "resources/js/".
+
+10) Create a Home page in Pages folder("resources/js/Pages/Home.jsx")
+export default function Home() {
+    return (
+        <>
+        This is Home page
+        </>
+    );
+}
+
+11) Now changes your routes, simply go to  :
+Route::get('/', function () {
+    return inertia('Home');
+});
+
+12) Now, we are going to install Tailwind css, so run these two command : "npm install -D tailwindcss postcss autoprefixer" and "npx tailwindcss init -p" , after run commands open "tailwind.config.js" and add this code :
+import defaultTheme from 'tailwindcss/defaultTheme';
+
+/** @type {import('tailwindcss').Config} */
+export default {
+    content: [
+        './resources/**/*.blade.php',
+        './resources/**/*.js',
+        './resources/**/*.css',
+    ],
+    theme: {
+        extend: {
+            fontFamily: {
+                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+            },
+        },
+    },
+    plugins: [],
+};
+
+13) Now open the file app.css and thsi code :
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+14) now import app.css file in app.jsx
+
